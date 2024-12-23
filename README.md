@@ -61,7 +61,7 @@ For more information about the available options, run any of the pipeline script
 ```shell script
   -h, --help            show this help message and exit
   --input INPUT, -i INPUT
-                        Input source. Can be a file, USB or RPi camera (CSI camera module). For RPi camera use '-i rpi' (Still in Beta). Defaults to example video resources/detection0.mp4
+                        Input source. Can be a file, USB (webcam) or RPi camera (CSI camera module). For RPi camera use '-i rpi' Defaults to example video resources/example.mp4
   --use-frame, -u       Use frame from the callback function
   --show-fps, -f        Print FPS on sink
   --arch {hailo8,hailo8l}
