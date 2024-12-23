@@ -70,7 +70,7 @@ def get_default_parser():
     default_video_source = os.path.join(current_path, '../resources/example.mp4')
     parser.add_argument(
         "--input", "-i", type=str, default=default_video_source,
-        help="Input source. Can be a file, USB (webcam), RPi camera (CSI camera module) or ximage (Not working for RPi). \
+        help="Input source. Can be a file, USB (webcam), RPi camera (CSI camera module) or ximage (Not compatible with RPi). \
         For RPi camera use '-i rpi' \
         Defaults to example video resources/example.mp4"
     )
