@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hailo_apps_infra"
+version = "0.1.0"
+description = "A collection of infrastructure utilities for Hailo applications"
+readme = "README.md"
+readme-content-type = "text/markdown"
+authors = [{ name = "Gilad Nahor", email = "giladn@hailo.ai" }]
+requires-python = ">=3.6"
+dependencies = [
+    "numpy<2.0.0",
+    "setproctitle",
+    "opencv-python"
+]
+
+[project.urls]
+homepage = "https://github.com/hailo-ai/hailo-apps-infra"
+
+[tool.setuptools.package-data]
+"hailo_apps_infra" = ["*.json", "*.sh", "*.cpp", "*.hpp", "*.pc", "*.mp4"]
+
+[tool.setuptools.include-package-data]
+include-package-data = true
+
+[project.scripts]
+get-usb-camera = "hailo_apps_infra.get_usb_camera:main"
