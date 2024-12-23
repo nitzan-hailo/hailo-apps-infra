@@ -21,7 +21,7 @@ homepage = "https://github.com/hailo-ai/hailo-apps-infra"
 include-package-data = true
 
 [tool.setuptools.package-data]
-"hailo_apps_infra" = ["*.json", "*.sh", "*.cpp", "*.hpp", "*.pc", "*.mp4"]
+"hailo_apps_infra" = ["*.json", "*.sh", "*.cpp", "*.hpp", "*.pc", "*.mp4", "*.so", "resources/*"]
 
 [tool.setuptools.packages]
 find = { include = ["hailo_apps_infra"] }
