@@ -93,7 +93,7 @@ class GStreamerPoseEstimationApp(GStreamerApp):
 
         display_pipeline = DISPLAY_PIPELINE(video_sink=self.video_sink, sync=self.sync, show_fps=self.show_fps)
         pipeline_string = (
-            f'{source_pipeline} '
+            f'{source_pipeline} !'
             f'{infer_pipeline_wrapper} ! '
             f'{tracker_pipeline} ! '
             f'{user_callback_pipeline} ! '
