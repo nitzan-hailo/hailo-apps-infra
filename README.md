@@ -25,7 +25,7 @@ This will install the Hailo Applications Infrastructure package directly from th
 
 1. Clone the repository:
     ```shell script
-    git clone https://github.com/ronithailo/hailo-apps-infra.git
+    git clone https://github.com/hailo-ai/hailo-apps-infra.git
             
     cd hailo-apps-infra
     ```
