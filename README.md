@@ -22,54 +22,10 @@ This will install the Hailo Applications Infrastructure package directly from th
 
 ## Running the Pipelines
 --------------------
+[Running Hailo Pipelines](https://github.com/hailo-ai/hailo-rpi5-examples/blob/main/doc/basic-pipelines.md)
 
-1. Clone the repository:
-    ```shell script
-    git clone https://github.com/ronithailo/hailo-apps-infra.git
-            
-    cd hailo-apps-infra
-    ```
-
-2. Install the Python Package
-
-    Ensure you are inside a virtual environment with Pyhailort installed. Then, run the following command:
-    ```shell script
-    pip install -v -e .
-    ```
-    This will install the package in editable mode, allowing you to make changes to the codebase and use them immediately without reinstalling.
-
-3. Running Detection Pipeline:
-    ```shell script
-    python hailo_apps_infra/detection_pipeline.py 
-    ```
-    ![Example](./resources/detection.gif)
-4. Running Pose Estimation Pipeline:
-    ```shell script
-    python hailo_apps_infra/pose_estimation_pipeline.py
-    ```
-    ![Example](./resources/pose_estimation.gif)
-5. Running Instance Segmentation Pipeline:
-    ```shell script
-    python hailo_apps_infra/instance_segmentation_pipeline.py
-    ```
-    ![Example](./resources/instance_segmentation.gif)
-## Pipeline Options
-For more information about the available options, run any of the pipeline scripts with the -h flag:
-    ```shell script
-    python hailo_apps_infra/detection_pipeline.py -h
-    ```
-```shell script
-  -h, --help            show this help message and exit
-  --input INPUT, -i INPUT
-                        Input source. Can be a file, USB or RPi camera (CSI camera module). For RPi camera use '-i rpi' (Still in Beta). Defaults to example video resources/detection0.mp4
-  --use-frame, -u       Use frame from the callback function
-  --show-fps, -f        Print FPS on sink
-  --arch {hailo8,hailo8l}
-                        Specify the Hailo architecture (hailo8 or hailo8l). Default is None , app will run check.
-  --hef-path HEF_PATH   Path to HEF file
-  --disable-sync        Disables display sink sync, will run as fast as possible. Relevant when using file source.
-  --dump-dot            Dump the pipeline graph to a dot file pipeline.dot
-```
+## Hailo Raspberry Pi Common Utilities
+[Hailo Raspberry Pi Common Utilities](https://github.com/hailo-ai/hailo-apps-infra/blob/master/doc/development_guide.md)
 
 License
 ----------
