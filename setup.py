@@ -53,7 +53,7 @@ def main():
         description='A collection of infrastructure utilities for Hailo applications',
         long_description=open('README.md').read(),
         long_description_content_type='text/markdown',
-        author='Gilad Nahor,
+        author='Gilad Nahor',
         author_email='giladn@hailo.ai',
         url='https://github.com/hailo-ai/hailo-apps-infra',
         install_requires=requirements,
