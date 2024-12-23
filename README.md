@@ -32,7 +32,7 @@ This will install the Hailo Applications Infrastructure package directly from th
 
 2. Install the Python Package
 
-    We recommend running it within a virtual environment.
+    Ensure you are inside a virtual environment with Pyhailort installed. Then, run the following command:
     ```shell script
     pip install -v -e .
     ```
