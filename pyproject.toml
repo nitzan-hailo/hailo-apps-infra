@@ -17,11 +17,14 @@ dependencies = [
 [project.urls]
 homepage = "https://github.com/hailo-ai/hailo-apps-infra"
 
+[tool.setuptools]
+include-package-data = true
+
 [tool.setuptools.package-data]
 "hailo_apps_infra" = ["*.json", "*.sh", "*.cpp", "*.hpp", "*.pc", "*.mp4"]
 
-[tool.setuptools]
-include-package-data = true
+[tool.setuptools.packages]
+find = { include = ["hailo_apps_infra"] }
 
 [project.scripts]
 get-usb-camera = "hailo_apps_infra.get_usb_camera:main"
