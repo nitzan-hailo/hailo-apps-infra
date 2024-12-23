@@ -74,7 +74,7 @@ class GStreamerDetectionApp(GStreamerApp):
 
         # Set the post-processing shared object file
         self.post_process_so = os.path.join(self.current_path, '../resources/libyolo_hailortpp_postprocess.so')
-
+        self.post_function_name = "filter_letterbox"
         # User-defined label JSON file
         self.labels_json = args.labels_json
 
@@ -96,6 +96,7 @@ class GStreamerDetectionApp(GStreamerApp):
         detection_pipeline = INFERENCE_PIPELINE(
             hef_path=self.hef_path,
             post_process_so=self.post_process_so,
+            post_function_name=self.post_function_name,
             batch_size=self.batch_size,
             config_json=self.labels_json,
             additional_params=self.thresholds_str)
@@ -104,7 +105,7 @@ class GStreamerDetectionApp(GStreamerApp):
         user_callback_pipeline = USER_CALLBACK_PIPELINE()
         display_pipeline = DISPLAY_PIPELINE(video_sink=self.video_sink, sync=self.sync, show_fps=self.show_fps)
         pipeline_string = (
-            f'{source_pipeline} '
+            f'{source_pipeline} ! '
             f'{detection_pipeline_wrapper} ! '
             f'{tracker_pipeline} ! '
             f'{user_callback_pipeline} ! '

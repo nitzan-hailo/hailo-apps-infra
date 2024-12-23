@@ -17,7 +17,7 @@ def check_hailo_package():
     except ImportError:
         logger.error("Hailo python package not found. Please make sure you're in the Hailo virtual environment. Run 'source setup_env.sh' and try again.")
         sys.exit(1)
-        
+
 def run_shell_command(command, error_message):
     logger.info(f"Running command: {command}")
     result = subprocess.run(command, shell=True)
@@ -46,14 +46,14 @@ def main():
     run_shell_command("./compile_postprocess.sh", "Failed to compile C++ code")
     logger.info("Downloading Resources...")
     run_shell_command("./download_resources.sh --all", "Failed to download resources")
-    
+
     setup(
         name='hailo_apps_infra',
         version='0.1.0',
         description='A collection of infrastructure utilities for Hailo applications',
         long_description=open('README.md').read(),
         long_description_content_type='text/markdown',
-        author='Gilad Nahor,
+        author='Gilad Nahor',
         author_email='giladn@hailo.ai',
         url='https://github.com/hailo-ai/hailo-apps-infra',
         install_requires=requirements,
@@ -68,7 +68,6 @@ def main():
             ],
         },
     )
-    
+
 if __name__ == '__main__':
     main()
-    

@@ -89,42 +89,69 @@ def SOURCE_PIPELINE(video_source, video_width=640, video_height=640, video_forma
         f'videoscale name={name}_videoscale n-threads=2 ! '
         f'{QUEUE(name=f"{name}_convert_q")} ! '
         f'videoconvert n-threads=3 name={name}_convert qos=false ! '
-        f'video/x-raw, pixel-aspect-ratio=1/1, format={video_format}, width={video_width}, height={video_height} ! '
+        f'video/x-raw, pixel-aspect-ratio=1/1, format={video_format}, width={video_width}, height={video_height} '
     )
 
     return source_pipeline
 
-def INFERENCE_PIPELINE(hef_path, post_process_so, batch_size=1, config_json=None, post_function_name=None, additional_params='', name='inference'):
+def INFERENCE_PIPELINE(
+    hef_path,
+    post_process_so=None,
+    batch_size=1,
+    config_json=None,
+    post_function_name=None,
+    additional_params='',
+    name='inference',
+    # Extra hailonet parameters
+    scheduler_timeout_ms=None,
+    scheduler_priority=None,
+    vdevice_group_id=1,
+    multi_process_service=None
+):
     """
     Creates a GStreamer pipeline string for inference and post-processing using a user-provided shared object file.
     This pipeline includes videoscale and videoconvert elements to convert the video frame to the required format.
     The format and resolution are automatically negotiated based on the HEF file requirements.
 
     Args:
-        hef_path (str): The path to the HEF file.
-        post_process_so (str): The path to the post-processing shared object file.
-        batch_size (int, optional): The batch size for the hailonet element. Defaults to 1.
-        config_json (str, optional): The path to the configuration JSON file. If None, no configuration is added. Defaults to None.
-        post_function_name (str, optional): The name of the post-processing function. If None, no function name is added. Defaults to None.
-        additional_params (str, optional): Additional parameters for the hailonet element. Defaults to ''.
-        name (str, optional): The prefix name for the pipeline elements. Defaults to 'inference'.
+        hef_path (str): Path to the HEF file.
+        post_process_so (str or None): Path to the post-processing .so file. If None, post-processing is skipped.
+        batch_size (int): Batch size for hailonet (default=1).
+        config_json (str or None): Config JSON for post-processing (e.g., label mapping).
+        post_function_name (str or None): Function name in the .so postprocess.
+        additional_params (str): Additional parameters appended to hailonet.
+        name (str): Prefix name for pipeline elements (default='inference').
+
+        # Extra hailonet parameters
+        Run `gst-inspect-1.0 hailonet` for more information.
+        vdevice_group_id (int): hailonet vdevice-group-id. Default=1.
+        scheduler_timeout_ms (int or None): hailonet scheduler-timeout-ms. Default=None.
+        scheduler_priority (int or None): hailonet scheduler-priority. Default=None.
+        multi_process_service (bool or None): hailonet multi-process-service. Default=None.
 
     Returns:
         str: A string representing the GStreamer pipeline for inference.
     """
-    # Configure config path if provided
-    if config_json is not None:
-        config_str = f' config-path={config_json} '
-    else:
-        config_str = ''
+    # config & function strings
+    config_str = f' config-path={config_json} ' if config_json else ''
+    function_name_str = f' function-name={post_function_name} ' if post_function_name else ''
+    vdevice_group_id_str = f' vdevice-group-id={vdevice_group_id} '
+    multi_process_service_str = f' multi-process-service={str(multi_process_service).lower()} ' if multi_process_service is not None else ''
+    scheduler_timeout_ms_str = f' scheduler-timeout-ms={scheduler_timeout_ms} ' if scheduler_timeout_ms is not None else ''
+    scheduler_priority_str = f' scheduler-priority={scheduler_priority} ' if scheduler_priority is not None else ''
 
-    # Configure function name if provided
-    if post_function_name is not None:
-        function_name_str = f' function-name={post_function_name} '
-    else:
-        function_name_str = ''
+    hailonet_str = (
+        f'hailonet name={name}_hailonet '
+        f'hef-path={hef_path} '
+        f'batch-size={batch_size} '
+        f'{vdevice_group_id_str}'
+        f'{multi_process_service_str}'
+        f'{scheduler_timeout_ms_str}'
+        f'{scheduler_priority_str}'
+        f'{additional_params} '
+        f'force-writable=true '
+    )
 
-    # Construct the inference pipeline string
     inference_pipeline = (
         f'{QUEUE(name=f"{name}_scale_q")} ! '
         f'videoscale name={name}_videoscale n-threads=2 qos=false ! '
@@ -132,10 +159,16 @@ def INFERENCE_PIPELINE(hef_path, post_process_so, batch_size=1, config_json=None
         f'video/x-raw, pixel-aspect-ratio=1/1 ! '
         f'videoconvert name={name}_videoconvert n-threads=2 ! '
         f'{QUEUE(name=f"{name}_hailonet_q")} ! '
-        f'hailonet name={name}_hailonet hef-path={hef_path} batch-size={batch_size} {additional_params} force-writable=true ! '
-        f'{QUEUE(name=f"{name}_hailofilter_q")} ! '
-        f'hailofilter name={name}_hailofilter so-path={post_process_so} {config_str} {function_name_str} qos=false '
+        f'{hailonet_str} ! '
     )
+
+    if post_process_so:
+        inference_pipeline += (
+            f'{QUEUE(name=f"{name}_hailofilter_q")} ! '
+            f'hailofilter name={name}_hailofilter so-path={post_process_so} {config_str} {function_name_str} qos=false ! '
+        )
+
+    inference_pipeline += f'{QUEUE(name=f"{name}_output_q")} '
 
     return inference_pipeline
 
@@ -239,3 +272,53 @@ def TRACKER_PIPELINE(class_id, kalman_dist_thr=0.8, iou_thr=0.9, init_iou_thr=0.
         f'{QUEUE(name=f"{name}_q")} '
     )
     return tracker_pipeline
+
+def CROPPER_PIPELINE(
+    inner_pipeline,
+    so_path,
+    function_name,
+    use_letterbox=True,
+    no_scaling_bbox=True,
+    internal_offset=True,
+    resize_method='bilinear',
+    bypass_max_size_buffers=20,
+    name='cropper_wrapper'
+):
+    """
+    Wraps an inner pipeline with hailocropper and hailoaggregator.
+    The cropper will crop detections made by earlier stages in the pipeline.
+    Each detection is cropped and sent to the inner pipeline for further processing.
+    The aggregator will combine the cropped detections with the original frame.
+    Example use case: After face detection pipeline stage, crop the faces and send them to a face recognition pipeline.
+
+    Args:
+        inner_pipeline (str): The pipeline string to be wrapped.
+        so_path (str): The path to the cropper .so library.
+        function_name (str): The function name in the .so library.
+        use_letterbox (bool): Whether to preserve aspect ratio. Defaults True.
+        no_scaling_bbox (bool): If True, bounding boxes are not scaled. Defaults True.
+        internal_offset (bool): If True, uses internal offsets. Defaults True.
+        resize_method (str): The resize method. Defaults to 'inter-area'.
+        bypass_max_size_buffers (int): For the bypass queue. Defaults to 20.
+        name (str): A prefix name for pipeline elements. Defaults 'cropper_wrapper'.
+
+    Returns:
+        str: A pipeline string representing hailocropper + aggregator around the inner_pipeline.
+    """
+    return (
+        f'queue name={name}_input_q ! '
+        f'hailocropper name={name}_cropper '
+        f'so-path={so_path} '
+        f'function-name={function_name} '
+        f'use-letterbox={str(use_letterbox).lower()} '
+        f'no-scaling-bbox={str(no_scaling_bbox).lower()} '
+        f'internal-offset={str(internal_offset).lower()} '
+        f'resize-method={resize_method} '
+        f'hailoaggregator name={name}_agg '
+        # bypass
+        f'{name}_cropper. ! queue name={name}_bypass_q max-size-buffers={bypass_max_size_buffers} ! {name}_agg.sink_0 '
+        # pipeline for the actual inference
+        f'{name}_cropper. ! {inner_pipeline} ! {name}_agg.sink_1 '
+        # aggregator output
+        f'{name}_agg. ! queue name={name}_output_q '
+    )
