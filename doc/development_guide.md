@@ -59,6 +59,21 @@ Use the `INFERENCE_PIPELINE_WRAPPER` function to encapsulate your inference pipe
 
 ---
 
+### `TRACKER_PIPELINE`
+**Description:**
+Wraps an inner pipeline with hailocropper and hailoaggregator.
+The cropper will crop detections made by earlier stages in the pipeline.
+Each detection is cropped and sent to the inner pipeline for further processing.
+The aggregator will combine the cropped detections with the original frame.
+Example use case: After face detection pipeline stage, crop the faces and send them to a face recognition pipeline.
+
+**Usage:**
+Use the `TRACKER_PIPELINE` function to add a tracker stage to your pipeline for tracking detections.
+
+**For more details, refer to the [`TRACKER_PIPELINE` function in `gstreamer_helper_pipelines.py`](hailo_apps_infra/gstreamer_helper_pipelines.py).**
+
+---
+
 ### `DISPLAY_PIPELINE`
 
 **Description:**
@@ -81,6 +96,18 @@ Use the `USER_CALLBACK_PIPELINE` function to add a callback stage to your pipeli
 
 **For more details, refer to the [`USER_CALLBACK_PIPELINE` function in `gstreamer_helper_pipelines.py`](hailo_apps_infra/gstreamer_helper_pipelines.py).**
 
+### `CROPPER_PIPELINE`
+**Description:**
+Wraps an inner pipeline with hailocropper and hailoaggregator.
+The cropper will crop detections made by earlier stages in the pipeline.
+Each detection is cropped and sent to the inner pipeline for further processing.
+The aggregator will combine the cropped detections with the original frame.
+Example use case: After face detection pipeline stage, crop the faces and send them to a face recognition pipeline.
+
+**Usage:**
+Use the `CROPPER_PIPELINE` function to add a cropper stage to your pipeline, enabling cascading detections to the next network.
+
+**For more details, refer to the [`CROPPER_PIPELINE` function in `gstreamer_helper_pipelines.py`](hailo_apps_infra/gstreamer_helper_pipelines.py).**
 
 ## Additional Features
 Run any example with the `--help` flag to view all available options.
@@ -98,7 +125,7 @@ Hailo App Help
 options:
   -h, --help            show this help message and exit
   --input INPUT, -i INPUT
-                        Input source. Can be a file, USB (webcam), RPi camera (CSI camera module) or ximage (Not compatible with RPi). For RPi camera use '-i rpi' Defaults to example video resources/example.mp4
+                        Input source. Can be a file, USB (webcam), RPi camera (CSI camera module) or ximage. For RPi camera use '-i rpi' Defaults to example video resources/example.mp4
   --use-frame, -u       Use frame from the callback function
   --show-fps, -f        Print FPS on sink
   --arch {hailo8,hailo8l}
@@ -119,7 +146,7 @@ By default, these examples use an example video source. You can change the input
 #### Raspberry Pi Camera Input
 To use the Raspberry Pi camera input, run the following command:
 ```bash
-python basic_pipelines/detection.py --input rpi
+python hailo_apps_infra/detection_pipeline.py --input rpi
 ```
 
 #### USB Camera Input
@@ -135,10 +162,10 @@ ffplay -f v4l2 /dev/video<X>
 ```
 **USB Camera input example:**
 ```bash
-python basic_pipelines/detection.py --input /dev/video<X>
+python hailo_apps_infra/detection_pipeline.py --input /dev/video<X>
 ```
 
-#### XImage Camera Input
+#### XImage Window Input
 This input is not compatible with Raspberry Pi (RPi).
 
 In the CLI, run:
@@ -196,7 +223,7 @@ Useful for debugging and understanding the pipeline structure. To dump the pipel
 ```bash
 python hailo_apps_infra/detection_pipeline.py  --dump-dot
 ```
-This creates a file named `pipeline.dot` in the `basic_pipelines` directory.
+This creates a file named `pipeline.dot` in the `hailo_apps_infra` directory.
 
 **Visualize the pipeline using Graphviz:**
 1. **Install Graphviz:**
@@ -205,15 +232,12 @@ This creates a file named `pipeline.dot` in the `basic_pipelines` directory.
     ```
 2. **Visualize the pipeline:**
     ```bash
-    dot -Tx11 basic_pipelines/pipeline.dot &
+    dot -Tx11 hailo_apps_infra/pipeline.dot &
     ```
 3. **Save the pipeline as a PNG:**
     ```bash
-    dot -Tpng basic_pipelines/pipeline.dot -o pipeline.png
+    dot -Tpng hailo_apps_infra/pipeline.dot -o pipeline.png
     ```
-**Example Output:**
-![detection_pipeline](images/detection_pipeline.png)
-*Tip: Right-click the image and select "Open image in new tab" to view the full image.*
 
 # Troubleshooting and Known Issues
 If you encounter any issues, please open a ticket in the [Hailo Community Forum](https://community.hailo.ai/). The forum is a valuable resource filled with useful information and potential solutions.

@@ -19,17 +19,28 @@ pip install git+https://github.com/hailo-ai/hailo-apps-infra.git
 ```
 This will install the Hailo Applications Infrastructure package directly from the repository.
 
+For reinstall the package please use:
+```shell script
+pip install --force-reinstall git+https://github.com/hailo-ai/hailo-apps-infra.git
+```
+
+## Working Locally
+To make changes and work with the code locally:
+```shell script
+git clone https://github.com/hailo-ai/hailo-apps-infra.git
+pip install --force-reinstall -v -e .
+```
 
 ## Running the Pipelines
 --------------------
 [Running Hailo Pipelines](https://github.com/hailo-ai/hailo-rpi5-examples/blob/main/doc/basic-pipelines.md)
 
 ## Hailo Raspberry Pi Common Utilities
-[Hailo Raspberry Pi Common Utilities](https://github.com/hailo-ai/hailo-apps-infra/blob/master/doc/development_guide.md)
+[Hailo Raspberry Pi Common Utilities](doc/development_guide.md)
 
 License
 ----------
-The infrastructure is released under the MIT license. Please see the https://github.com/hailo-ai/hailo-BEV/blob/main/LICENSE file for more information.
+The infrastructure is released under the MIT license. Please see the [LICENSE](LICENSE) file for more information.
 
 
 Disclaimer
