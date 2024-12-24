@@ -15,25 +15,25 @@ Requirements
 -----------------------------
 To install the package, ensure you are inside a virtual environment with Pyhailort installed. Then, run the following command:
 ```shell script
-pip install git+https://github.com/hailo-ai/hailo-apps-infra.git
+pip install git+https://github.com/giladnah/hailo-apps-infra.git
 ```
 This will install the Hailo Applications Infrastructure package directly from the repository.
 
 For reinstall the package please use:
 ```shell script
-pip install --force-reinstall git+https://github.com/hailo-ai/hailo-apps-infra.git
+pip install --force-reinstall git+https://github.com/giladnah/hailo-apps-infra.git
 ```
 
 ## Working Locally
 To make changes and work with the code locally:
 ```shell script
-git clone https://github.com/hailo-ai/hailo-apps-infra.git
+git clone https://github.com/giladnah/hailo-apps-infra.git
 pip install --force-reinstall -v -e .
 ```
 
 ## Running the Pipelines
 --------------------
-[Running Hailo Pipelines](https://github.com/hailo-ai/hailo-rpi5-examples/blob/main/doc/basic-pipelines.md)
+[Running Hailo Pipelines](https://github.com/giladnah/hailo-rpi5-examples/blob/main/doc/basic-pipelines.md)
 
 ## Hailo Raspberry Pi Common Utilities
 [Hailo Raspberry Pi Common Utilities](doc/development_guide.md)
