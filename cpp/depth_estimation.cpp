@@ -7,8 +7,19 @@
 
 #include "xtensor/xtensor.hpp"
 #include "xtensor/xarray.hpp"
+#include "xtensor/xview.hpp"
 
-const char *output_layer_name = "fast_depth/conv20";
+const char *output_layer_name = "scdepthv3/conv31";
+
+
+    void bla(xt::xarray<float>& arr)
+    {
+        auto foo = xt::view(arr, 0, 0, xt::all());
+
+        for (int i = 0; i < foo.size(); i++)
+            foo.data()[i] = 1/((1.0f / (1.0f + std::exp(-1.0 * foo.data()[i])))*10 + 0.009);
+    }
+
 void fast_depth(HailoROIPtr roi)
 {
     if (!roi->has_tensors())
@@ -24,6 +35,8 @@ void fast_depth(HailoROIPtr roi)
     xt::xarray<float> logits_dequantized = common::dequantize(tensor_data, tensor_ptr->vstream_info().quant_info.qp_scale, tensor_ptr->vstream_info().quant_info.qp_zp);
     // here, logits_dequantized containes the estimated depth of each pixel in meters.
 
+    bla(logits_dequantized);
+   
     // allocate and memcpy to a new memory so it points to the right data
     std::vector<float> data(logits_dequantized.size());
     memcpy(data.data(), logits_dequantized.data(), sizeof(float) * logits_dequantized.size());

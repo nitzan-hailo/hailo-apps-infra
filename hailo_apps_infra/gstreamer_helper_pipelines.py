@@ -239,8 +239,6 @@ def DISPLAY_PIPELINE(video_sink='xvimagesink', sync='true', show_fps='false', na
     """
     # Construct the display pipeline string
     display_pipeline = (
-        f'{QUEUE(name=f"{name}_hailooverlay_q")} ! '
-        f'hailooverlay name={name}_hailooverlay ! '
         f'{QUEUE(name=f"{name}_videoconvert_q")} ! '
         f'videoconvert name={name}_videoconvert n-threads=2 qos=false ! '
         f'{QUEUE(name=f"{name}_q")} ! '

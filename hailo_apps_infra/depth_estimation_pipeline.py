@@ -44,7 +44,7 @@ class GStreamerDepthEstimationApp(GStreamerApp):
 
         super().__init__(args, user_data)
         
-        self.hef_path = os.path.join(self.current_path, '../resources/fast_depth.hef')
+        self.hef_path = os.path.join(self.current_path, '../resources/scdepthv3.hef')
         self.app_callback = app_callback
         self.batch_size = 8
         self.post_process_so = os.path.join(self.current_path, '../resources/libdepth_estimation.so')
@@ -60,15 +60,15 @@ class GStreamerDepthEstimationApp(GStreamerApp):
             hef_path=self.hef_path,
             post_process_so=self.post_process_so,
             batch_size=self.batch_size)
-        depth_estimation_tiling_pipeline = TILING_PIPELINE_WRAPPER(depth_estimation_pipeline, tiles_x=3, tiles_y=2, overlap_x=0.1, overlap_y=0.1)
+        depth_estimation_tiling_pipeline = TILING_PIPELINE_WRAPPER(depth_estimation_pipeline, tiles_x=1, tiles_y=1, overlap_x=0, overlap_y=0)
         user_callback_pipeline = USER_CALLBACK_PIPELINE()
         display_pipeline = DISPLAY_PIPELINE(video_sink=self.video_sink, sync=False, show_fps=self.show_fps)
-        display_pipeline2 = DISPLAY_PIPELINE(video_sink=self.video_sink, sync=False, show_fps=self.show_fps, name="display2")
+#        display_pipeline2 = DISPLAY_PIPELINE(video_sink=self.video_sink, sync=False, show_fps=self.show_fps, name="display2")
         pipeline_string = (
-            f'{source_pipeline} ! tee name=t t. ! '
+            f'{source_pipeline} ! '
             f'{depth_estimation_tiling_pipeline} ! '
-            f'{user_callback_pipeline} ! '
-            f'{display_pipeline} t. ! {display_pipeline2} '
+            f'hailooverlay ! {user_callback_pipeline} ! '
+            f'{display_pipeline}'
         )
         print(pipeline_string)
         return pipeline_string
