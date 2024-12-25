@@ -18,6 +18,7 @@ from hailo_apps_infra.gstreamer_helper_pipelines import(
     SOURCE_PIPELINE,
     INFERENCE_PIPELINE,
     INFERENCE_PIPELINE_WRAPPER,
+    TILING_PIPELINE_WRAPPER,
     RESIZE_PIPELINE,
     USER_CALLBACK_PIPELINE,
     DISPLAY_PIPELINE,
@@ -45,7 +46,7 @@ class GStreamerDepthEstimationApp(GStreamerApp):
         
         self.hef_path = os.path.join(self.current_path, '../resources/fast_depth.hef')
         self.app_callback = app_callback
-        self.batch_size = 1
+        self.batch_size = 8
         self.post_process_so = os.path.join(self.current_path, '../resources/libdepth_estimation.so')
 
         # Set the process title
@@ -59,13 +60,13 @@ class GStreamerDepthEstimationApp(GStreamerApp):
             hef_path=self.hef_path,
             post_process_so=self.post_process_so,
             batch_size=self.batch_size)
-        depth_estimation_pipeline_wrapper = INFERENCE_PIPELINE_WRAPPER(depth_estimation_pipeline, use_letterbox=False)
+        depth_estimation_tiling_pipeline = TILING_PIPELINE_WRAPPER(depth_estimation_pipeline, tiles_x=3, tiles_y=2, overlap_x=0.1, overlap_y=0.1)
         user_callback_pipeline = USER_CALLBACK_PIPELINE()
         display_pipeline = DISPLAY_PIPELINE(video_sink=self.video_sink, sync=False, show_fps=self.show_fps)
         display_pipeline2 = DISPLAY_PIPELINE(video_sink=self.video_sink, sync=False, show_fps=self.show_fps, name="display2")
         pipeline_string = (
             f'{source_pipeline} ! tee name=t t. ! '
-            f'{depth_estimation_pipeline_wrapper} ! '
+            f'{depth_estimation_tiling_pipeline} ! '
             f'{user_callback_pipeline} ! '
             f'{display_pipeline} t. ! {display_pipeline2} '
         )

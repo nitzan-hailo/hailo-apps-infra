@@ -31,7 +31,7 @@ def QUEUE(name, max_size_buffers=3, max_size_bytes=0, max_size_time=0, leaky='no
     q_string = f'queue name={name} leaky={leaky} max-size-buffers={max_size_buffers} max-size-bytes={max_size_bytes} max-size-time={max_size_time} '
     return q_string
 
-def SOURCE_PIPELINE(video_source, video_width=640, video_height=640, video_format='RGB', name='source', no_webcam_compression=False):
+def SOURCE_PIPELINE(video_source, video_width=640, video_height=640, video_format='RGB', frames_per_sec=30, name='source', no_webcam_compression=False):
     """
     Creates a GStreamer pipeline string for the video source.
 
@@ -51,12 +51,12 @@ def SOURCE_PIPELINE(video_source, video_width=640, video_height=640, video_forma
         if no_webcam_compression:
             source_element = (
                 f'v4l2src device={video_source} name={name} ! '
-                'video/x-raw, format=RGB, width=640, height=480 ! '
+                'video/x-raw, format=RGB, width=640, height=480, framerate={frames_per_sec}/1 ! '
             )
         else:
             # Use compressed format for webcam
             source_element = (
-                f'v4l2src device={video_source} name={name} ! image/jpeg, framerate=30/1 ! '
+                f'v4l2src device={video_source} name={name} ! image/jpeg, framerate={frames_per_sec}/1 ! '
                 f'{QUEUE(name=f"{name}_queue_decode")} ! '
                 f'decodebin name={name}_decodebin ! '
             )
@@ -64,7 +64,7 @@ def SOURCE_PIPELINE(video_source, video_width=640, video_height=640, video_forma
         source_element = (
             f'appsrc name=app_source is-live=true leaky-type=downstream max-buffers=3 ! '
             'videoflip name=videoflip video-direction=horiz ! '
-            f'video/x-raw, format={video_format}, width={video_width}, height={video_height} ! '
+            f'video/x-raw, format={video_format}, width={video_width}, height={video_height}, framerate={frames_per_sec}/1 ! '
         )
     elif source_type == 'libcamera':
         source_element = (
@@ -201,6 +201,27 @@ def INFERENCE_PIPELINE_WRAPPER(inner_pipeline, bypass_max_size_buffers=20, name=
     )
 
     return inference_wrapper_pipeline
+
+
+def TILING_PIPELINE_WRAPPER(inner_pipeline, tiles_x=2, tiles_y=2, overlap_x=0, overlap_y=0, bypass_max_size_buffers=20, name='tiling_wrapper'):
+    """
+    Creates a GStreamer pipeline string that wraps an inner pipeline with a tiling pipeline.
+    Args:
+        inner_pipeline (str): The inner pipeline string to be wrapped.
+        name (str, optional): The prefix name for the pipeline elements. Defaults to 'tiling_wrapper'.
+
+    Returns:
+        str: A string representing the GStreamer pipeline for the tiling wrapper.
+    """
+    # Construct the inference wrapper pipeline string
+    return (
+        f'{QUEUE(name=f"{name}_input_q")} ! '
+        f'hailotilecropper name={name}_crop internal-offset=false tiles-along-x-axis={tiles_x} tiles-along-y-axis={tiles_y} overlap-x-axis={overlap_x} overlap-y-axis={overlap_y} '
+        f'hailotileaggregator flatten-detections=true iou-threshold=0.3 name={name}_agg '
+        f'{name}_crop. ! {QUEUE(max_size_buffers=bypass_max_size_buffers, name=f"{name}_bypass_q")} ! {name}_agg.sink_0 '
+        f'{name}_crop. ! {inner_pipeline} ! {name}_agg.sink_1 '
+        f'{name}_agg. ! {QUEUE(name=f"{name}_output_q")} '
+    )
 
 def DISPLAY_PIPELINE(video_sink='xvimagesink', sync='true', show_fps='false', name='hailo_display'):
     """
