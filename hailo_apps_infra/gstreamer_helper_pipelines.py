@@ -172,7 +172,7 @@ def INFERENCE_PIPELINE(
 
     return inference_pipeline
 
-def INFERENCE_PIPELINE_WRAPPER(inner_pipeline, bypass_max_size_buffers=20, name='inference_wrapper'):
+def INFERENCE_PIPELINE_WRAPPER(inner_pipeline, bypass_max_size_buffers=20, name='inference_wrapper', use_letterbox=True):
     """
     Creates a GStreamer pipeline string that wraps an inner pipeline with a hailocropper and hailoaggregator.
     This allows to keep the original video resolution and color-space (format) of the input frame.
@@ -193,7 +193,7 @@ def INFERENCE_PIPELINE_WRAPPER(inner_pipeline, bypass_max_size_buffers=20, name=
     # Construct the inference wrapper pipeline string
     inference_wrapper_pipeline = (
         f'{QUEUE(name=f"{name}_input_q")} ! '
-        f'hailocropper name={name}_crop so-path={whole_buffer_crop_so} function-name=create_crops use-letterbox=true resize-method=inter-area internal-offset=true '
+        f'hailocropper name={name}_crop so-path={whole_buffer_crop_so} function-name=create_crops use-letterbox={use_letterbox} resize-method=inter-area internal-offset=true '
         f'hailoaggregator name={name}_agg '
         f'{name}_crop. ! {QUEUE(max_size_buffers=bypass_max_size_buffers, name=f"{name}_bypass_q")} ! {name}_agg.sink_0 '
         f'{name}_crop. ! {inner_pipeline} ! {name}_agg.sink_1 '

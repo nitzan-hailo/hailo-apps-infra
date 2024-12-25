@@ -61,7 +61,7 @@ class GStreamerDepthEstimationApp(GStreamerApp):
             hef_path=self.hef_path,
             post_process_so=self.post_process_so,
             batch_size=self.batch_size)
-        depth_estimation_pipeline_wrapper = INFERENCE_PIPELINE_WRAPPER(depth_estimation_pipeline)
+        depth_estimation_pipeline_wrapper = INFERENCE_PIPELINE_WRAPPER(depth_estimation_pipeline, use_letterbox=False)
         user_callback_pipeline = USER_CALLBACK_PIPELINE()
         display_pipeline = DISPLAY_PIPELINE(video_sink=self.video_sink, sync=False, show_fps=self.show_fps)
         pipeline_string = (
