@@ -47,8 +47,6 @@ class GStreamerDepthEstimationApp(GStreamerApp):
         self.app_callback = app_callback
         self.batch_size = 1
         self.post_process_so = os.path.join(self.current_path, '../resources/libdepth_estimation.so')
-        # self.depth_height = 256
-        # self.depth_width = 352
 
         # Set the process title
         setproctitle.setproctitle("Hailo Depth Estimation App")
@@ -64,11 +62,12 @@ class GStreamerDepthEstimationApp(GStreamerApp):
         depth_estimation_pipeline_wrapper = INFERENCE_PIPELINE_WRAPPER(depth_estimation_pipeline, use_letterbox=False)
         user_callback_pipeline = USER_CALLBACK_PIPELINE()
         display_pipeline = DISPLAY_PIPELINE(video_sink=self.video_sink, sync=False, show_fps=self.show_fps)
+        display_pipeline2 = DISPLAY_PIPELINE(video_sink=self.video_sink, sync=False, show_fps=self.show_fps, name="display2")
         pipeline_string = (
-            f'{source_pipeline} ! '
+            f'{source_pipeline} ! tee name=t t. ! '
             f'{depth_estimation_pipeline_wrapper} ! '
             f'{user_callback_pipeline} ! '
-            f'{display_pipeline}'
+            f'{display_pipeline} t. ! {display_pipeline2} '
         )
         print(pipeline_string)
         return pipeline_string
