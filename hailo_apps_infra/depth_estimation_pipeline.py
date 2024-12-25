@@ -63,12 +63,16 @@ class GStreamerDepthEstimationApp(GStreamerApp):
         depth_estimation_tiling_pipeline = TILING_PIPELINE_WRAPPER(depth_estimation_pipeline, tiles_x=1, tiles_y=1, overlap_x=0, overlap_y=0)
         user_callback_pipeline = USER_CALLBACK_PIPELINE()
         display_pipeline = DISPLAY_PIPELINE(video_sink=self.video_sink, sync=False, show_fps=self.show_fps)
-#        display_pipeline2 = DISPLAY_PIPELINE(video_sink=self.video_sink, sync=False, show_fps=self.show_fps, name="display2")
+        display_pipeline2 = DISPLAY_PIPELINE(video_sink=self.video_sink, sync=False, show_fps=self.show_fps, name="display2")
         pipeline_string = (
             f'{source_pipeline} ! '
+            f'hailocropper so-path={self.post_process_so} function-name=crop_center name=center_crop ' 
+            f'center_crop. ! video/x-raw, format=RGB, width={self.video_width}, height={self.video_height}, framerate=30/1 ! queue leaky=no max-size-buffers=30 max-size-bytes=0 max-size-time=0 ! fakesink sync=false '
+            f'center_crop. ! video/x-raw, format=RGB, width={self.video_width}, height={self.video_height}, framerate=30/1 ! queue leaky=no max-size-buffers=30 max-size-bytes=0 max-size-time=0 ! '
+            f'tee name=t t. ! '
             f'{depth_estimation_tiling_pipeline} ! '
             f'hailooverlay ! {user_callback_pipeline} ! '
-            f'{display_pipeline}'
+            f'{display_pipeline} t. ! {display_pipeline2} '
         )
         print(pipeline_string)
         return pipeline_string

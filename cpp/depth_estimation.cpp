@@ -44,6 +44,17 @@ void fast_depth(HailoROIPtr roi)
     hailo_common::add_object(roi, std::make_shared<HailoDepthMask>(std::move(data), tensor_ptr->width(), tensor_ptr->height(), 1.0));
 }
 
+std::vector<HailoROIPtr> crop_center(std::shared_ptr<HailoMat> image, HailoROIPtr roi)
+{
+    std::vector<HailoROIPtr> crop_rois;
+
+    HailoBBox bbox = HailoBBox(0.2, 0.2, 0.6, 0.6);
+    auto detection = hailo_common::add_detection(roi, bbox, "crop", 1.0);
+    crop_rois.emplace_back(detection);
+
+    return crop_rois;
+}
+
 void filter(HailoROIPtr roi)
 {
     fast_depth(roi);
