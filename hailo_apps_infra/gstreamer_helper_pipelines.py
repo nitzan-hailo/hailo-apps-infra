@@ -322,3 +322,37 @@ def CROPPER_PIPELINE(
         # aggregator output
         f'{name}_agg. ! queue name={name}_output_q '
     )
+
+def RESIZE_PIPELINE(
+    width = 1920,
+    height = 1080,
+    qos = False,
+    format = 'RGB',
+    name='resize_wrapper'
+):
+    """
+    Wraps an inner pipeline with aspectratiocrop, videoconvert and videoscale.
+    The aspectratiocrop will crop convert the image the the required aspect ratio.
+    The videoconvert and videoscale elements will convert the image to the required format and resolution.
+    aspect ratio is taken from the width and height parameters.
+
+    Args:
+        width (int): The width of the output image.
+        height (int): The height of the output image.
+        qos (bool): Whether to enable QoS.
+        format (str): The format of the output image.
+        name (str): A prefix name for pipeline elements. Defaults 'resize_wrapper'.
+
+    Returns:
+        str: A pipeline string representing aspectratiocrop + videoconvert + videoscale from the source.
+    """
+
+    return (
+        f'queue name={name}_input_q ! '
+        f'videoconvert qos={qos} ! video/x-raw, format={format} ! '
+        f'queue name={name}_input_q ! '
+        f'aspectratiocrop aspect-ratio={width}/{height} ! '
+        f'queue name={name}_input_q ! '
+        f'videoscale qos={qos} ! video/x-raw, width={width}, height={height} ! '
+        f'queue name={name}_output_q '
+    )

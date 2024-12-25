@@ -58,3 +58,18 @@ shared_library('yolov5seg_postprocess',
     install: true,
     install_dir: join_paths(meson.project_source_root(), 'resources'),
 )
+
+################################################
+# DEPTH ESTIMATION SOURCES
+################################################
+depth_estimation_sources = [
+    'depth_estimation.cpp',
+]
+
+shared_library('depth_estimation',
+    depth_estimation_sources,
+    dependencies : postprocess_dep,
+    gnu_symbol_visibility : 'default',
+    install: true,
+    install_dir: join_paths(meson.project_source_root(), 'resources'),
+)
