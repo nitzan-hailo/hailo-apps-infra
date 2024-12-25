@@ -39,6 +39,7 @@ class GStreamerDepthEstimationApp(GStreamerApp):
     def __init__(self, app_callback, user_data):
         parser = get_default_parser()
         args = parser.parse_args()
+        args.input = 'rpi'
 
         super().__init__(args, user_data)
         
@@ -46,10 +47,8 @@ class GStreamerDepthEstimationApp(GStreamerApp):
         self.app_callback = app_callback
         self.batch_size = 1
         self.post_process_so = os.path.join(self.current_path, '../resources/libdepth_estimation.so')
-        self.post_function_name = "fast_depth"
-        self.depth_height = 256
-        self.depth_width = 352
-        
+        # self.depth_height = 256
+        # self.depth_width = 352
 
         # Set the process title
         setproctitle.setproctitle("Hailo Depth Estimation App")
@@ -66,8 +65,7 @@ class GStreamerDepthEstimationApp(GStreamerApp):
         user_callback_pipeline = USER_CALLBACK_PIPELINE()
         display_pipeline = DISPLAY_PIPELINE(video_sink=self.video_sink, sync=False, show_fps=self.show_fps)
         pipeline_string = (
-            #f'{source_pipeline} ! '
-            'videotestsrc ! video/x-raw,format=RGB,width=640,height=480,framerate=30/1 ! '
+            f'{source_pipeline} ! '
             f'{depth_estimation_pipeline_wrapper} ! '
             f'{user_callback_pipeline} ! '
             f'{display_pipeline}'
