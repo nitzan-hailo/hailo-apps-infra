@@ -12,13 +12,13 @@
 const char *output_layer_name = "scdepthv3/conv31";
 
 
-    void bla(xt::xarray<float>& arr)
-    {
-        auto foo = xt::view(arr, 0, 0, xt::all());
+void bla(xt::xarray<float>& arr)
+{
+    auto foo = xt::view(arr, 0, 0, xt::all());
 
-        for (int i = 0; i < foo.size(); i++)
-            foo.data()[i] = 1/((1.0f / (1.0f + std::exp(-1.0 * foo.data()[i])))*10 + 0.009);
-    }
+    for (int i = 0; i < foo.size(); i++)
+        foo.data()[i] = (1/((1.0f / (1.0f + std::exp(-1.0 * foo.data()[i])))*10 + 0.009)) * 10;
+}
 
 void fast_depth(HailoROIPtr roi)
 {
