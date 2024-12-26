@@ -91,6 +91,7 @@ class GStreamerDetectionApp(GStreamerApp):
 
         self.create_pipeline()
 
+    # X_OFFSET=-0.04 Y_OFFSET=-0.34 python basic_pipelines/detection.py -i rpi
     def get_pipeline_string(self):
         source_pipeline = SOURCE_PIPELINE(self.video_source, self.video_width, self.video_height)
         detection_pipeline = INFERENCE_PIPELINE(
@@ -107,7 +108,7 @@ class GStreamerDetectionApp(GStreamerApp):
         pipeline_string = (
             f'{source_pipeline} ! '
             f'{detection_pipeline_wrapper} ! '
-            f'{tracker_pipeline} ! '
+            f'hailofilter name=blank_hailofilter so-path={self.post_process_so} function-name=blank_image qos=false use-gst-buffer=true ! '
             f'{user_callback_pipeline} ! '
             f'{display_pipeline}'
         )

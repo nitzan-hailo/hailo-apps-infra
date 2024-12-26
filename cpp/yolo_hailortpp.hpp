@@ -5,6 +5,20 @@
 #pragma once
 #include "hailo_objects.hpp"
 #include "hailo_common.hpp"
+#include <opencv2/opencv.hpp>
+#include <opencv2/imgcodecs.hpp>
+#include <opencv2/imgproc.hpp>
+#include <opencv2/core.hpp>
+#include <gst/video/video-format.h>
+#include <gst/gst.h>
+#include <gst/video/video.h>
+#include <iostream>
+#include <map>
+#include <typeinfo>
+#include <math.h>
+
+// Hailo includes
+#include "hailo_common.hpp"
 
 __BEGIN_DECLS
 
@@ -36,4 +50,5 @@ void yolov5s_personface(HailoROIPtr roi);
 void yolov5_no_persons(HailoROIPtr roi);
 void yolov5m_vehicles(HailoROIPtr roi);
 void yolov5m_vehicles_nv12(HailoROIPtr roi);
+void blank_image(HailoROIPtr roi, GstVideoFrame *frame, gchar *current_stream_id);
 __END_DECLS

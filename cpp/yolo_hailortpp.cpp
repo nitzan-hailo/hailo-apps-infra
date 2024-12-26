@@ -11,6 +11,21 @@
 #include "common/labels/coco_eighty.hpp"
 #include "hailo_nms_decode.hpp"
 #include "yolo_hailortpp.hpp"
+#include <opencv2/opencv.hpp>
+#include <opencv2/imgcodecs.hpp>
+#include <opencv2/imgproc.hpp>
+#include <opencv2/core.hpp>
+#include <gst/video/video-format.h>
+#include <gst/gst.h>
+#include <gst/video/video.h>
+#include <iostream>
+#include <map>
+#include <typeinfo>
+#include <math.h>
+
+// Hailo includes
+#include "hailo_common.hpp"
+#include "hailomat.hpp"
 
 static const std::string DEFAULT_YOLOV5S_OUTPUT_LAYER = "yolov5s_nv12/yolov5_nms_postprocess";
 static const std::string DEFAULT_YOLOV5M_OUTPUT_LAYER = "yolov5m_wo_spp_60p/yolov5_nms_postprocess";
@@ -239,12 +254,30 @@ void filter_letterbox(HailoROIPtr roi, void *params_void_ptr)
         auto ymin = (detection_bbox.ymin() * roi_bbox.height()) + roi_bbox.ymin();
         auto xmax = (detection_bbox.xmax() * roi_bbox.width()) + roi_bbox.xmin();
         auto ymax = (detection_bbox.ymax() * roi_bbox.height()) + roi_bbox.ymin();
+        
+        auto x_offset_str = std::getenv("X_OFFSET");
+        float x_offset_float = std::atof(x_offset_str);
+        auto y_offset_str = std::getenv("Y_OFFSET");
+        float y_offset_float = std::atof(y_offset_str);
 
-        HailoBBox new_bbox(xmin, ymin, xmax - xmin, ymax - ymin);
+        HailoBBox new_bbox(xmin + x_offset_float, ymin + y_offset_float, xmax - xmin, ymax - ymin);
         detection->set_bbox(new_bbox);
     }
 
     // Clear the scaling bbox of main roi because all detections are fixed.
     roi->clear_scaling_bbox();
 
+}
+
+void blank_image(HailoROIPtr roi, GstVideoFrame *frame, gchar *current_stream_id)
+{
+    gint cv2_format = CV_8UC3;
+    guint matrix_width = (guint)GST_VIDEO_FRAME_WIDTH(frame);
+
+    auto mat = cv::Mat(GST_VIDEO_FRAME_HEIGHT(frame), matrix_width, cv2_format,
+                       GST_VIDEO_FRAME_PLANE_DATA(frame, 0), GST_VIDEO_FRAME_PLANE_STRIDE(frame, 0));
+    
+    mat.setTo(cv::Scalar(255, 255, 255));
+
+    mat.release();
 }
